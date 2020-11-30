@@ -40,22 +40,38 @@ class Data:
             if content["name"].lower()==country.lower():
                 return content
         return "0"
+
+    def get_list_of_countries(self):
+        countries = []
+        for country in self.data['country']:
+            countries.append(country['name'].lower())
+
+        return countries
+
+    def update_data(self):
+        response = requests.post(f'https://www.parsehub.com/api/v2/projects/{self.project_token}/run',
+                                 params=self.params)
 data = Data(API_KEY,PROJECT_TOKEN)
+
 def speak(text):
-    engine = pyttsx3.init()
-    engine.say(text)
-    engine.runAndWait()
+	engine = pyttsx3.init()
+	engine.say(text)
+	engine.runAndWait()
+
 
 def get_audio():
-    r = sr.Recognizer()
-    with sr.Microphone() as source:
-        audio = r.listen(source)
-        said = ""
-        try:
-            said = r.recognize_google(audio)
-        except Exception as e:
-            print("Exception",str(e))
-    return said.lower()
+	r = sr.Recognizer()
+	with sr.Microphone() as source:
+		audio = r.listen(source)
+		said = ""
+
+		try:
+			said = r.recognize_google(audio)
+		except Exception as e:
+			print("Exception:", str(e))
+
+	return said.lower()
+
 print(get_audio())
 
 
