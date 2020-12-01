@@ -1,6 +1,8 @@
 import requests
 import json
 import pyttsx3
+import time
+import threading
 
 import speech_recognition as sr
 API_KEY = "texE21-QTUFP"
@@ -51,7 +53,21 @@ class Data:
     def update_data(self):
         response = requests.post(f'https://www.parsehub.com/api/v2/projects/{self.project_token}/run',
                                  params=self.params)
-data = Data(API_KEY,PROJECT_TOKEN)
+
+        def poll():
+            time.sleep(0.1)
+            old_data = self.data
+            while True:
+                new_data = self.get_data()
+                if new_data != old_data:
+                    self.data = new_data
+                    print("Data updated")
+                    break
+                time.sleep(5)
+
+        t = threading.Thread(target=poll)
+        t.start()
+
 
 def speak(text):
 	engine = pyttsx3.init()
@@ -72,6 +88,5 @@ def get_audio():
 
 	return said.lower()
 
-print(get_audio())
 
 
