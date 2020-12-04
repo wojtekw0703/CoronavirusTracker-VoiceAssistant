@@ -3,6 +3,7 @@ import json
 import pyttsx3
 import time
 import threading
+import re
 
 import speech_recognition as sr
 API_KEY = "texE21-QTUFP"
@@ -87,6 +88,26 @@ def get_audio():
 			print("Exception:", str(e))
 
 	return said.lower()
+
+def main():
+	print("Started Program")
+	data = Data(API_KEY, PROJECT_TOKEN)
+	END_PHRASE = "stop"
+	country_list = data.get_list_of_countries()
+
+	TOTAL_PATTERNS = {
+					re.compile("[\w\s]+ total [\w\s]+ cases"):data.get_total_cases,
+					re.compile("[\w\s]+ total cases"): data.get_total_cases,
+                    re.compile("[\w\s]+ total [\w\s]+ deaths"): data.get_total_deaths,
+                    re.compile("[\w\s]+ total deaths"): data.get_total_deaths
+					}
+
+	COUNTRY_PATTERNS = {
+					re.compile("[\w\s]+ cases [\w\s]+"): lambda country: data.get_country_data(country)['total_cases'],
+                    re.compile("[\w\s]+ deaths [\w\s]+"): lambda country: data.get_country_data(country)['total_deaths'],
+					}
+
+	UPDATE_COMMAND = "update"
 
 
 
