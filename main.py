@@ -6,9 +6,9 @@ import threading
 import re
 
 import speech_recognition as sr
-API_KEY = "texE21-QTUFP"
-PROJECT_TOKEN = "tigYU5p1stUq"
-RUN_TOKEN = "tEesdam2LkbE"
+API_KEY = "****"
+PROJECT_TOKEN = "***"
+RUN_TOKEN = "***"
 
 class Data:
     def __init__(self, api_key, project_token):
@@ -108,6 +108,17 @@ def main():
 					}
 
 	UPDATE_COMMAND = "update"
+        while True:
+            print("Listening...")
+            text = get_audio()
+            print(text)
+            result = None
 
-
+            for pattern, func in COUNTRY_PATTERNS.items():
+                if pattern.match(text):
+                    words = set(text.split(" "))
+                    for country in country_list:
+                        if country in words:
+                            result = func(country)
+                            break
 
