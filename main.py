@@ -4,11 +4,12 @@ import pyttsx3
 import time
 import threading
 import re
-
+import pyaudio
 import speech_recognition as sr
-API_KEY = "****"
-PROJECT_TOKEN = "***"
-RUN_TOKEN = "***"
+
+API_KEY = ""
+PROJECT_TOKEN = ""
+RUN_TOKEN = ""
 
 class Data:
     def __init__(self, api_key, project_token):
@@ -90,35 +91,33 @@ def get_audio():
 	return said.lower()
 
 def main():
-	print("Started Program")
-	data = Data(API_KEY, PROJECT_TOKEN)
-	END_PHRASE = "stop"
-	country_list = data.get_list_of_countries()
-
-	TOTAL_PATTERNS = {
-					re.compile("[\w\s]+ total [\w\s]+ cases"):data.get_total_cases,
+    data = Data(API_KEY, PROJECT_TOKEN)
+    END_PHRASE = "stop"
+    country_list = data.get_list_of_countries()
+    TOTAL_PATTERNS = {re.compile("[\w\s]+ total [\w\s]+ cases"):data.get_total_cases,
 					re.compile("[\w\s]+ total cases"): data.get_total_cases,
                     re.compile("[\w\s]+ total [\w\s]+ deaths"): data.get_total_deaths,
-                    re.compile("[\w\s]+ total deaths"): data.get_total_deaths
-					}
+                    re.compile("[\w\s]+ total deaths"): data.get_total_deaths}
+    COUNTRY_PATTERNS = {re.compile("[\w\s]+ cases [\w\s]+"): lambda country: data.get_country_data(country)['total_cases'],
+                    re.compile("[\w\s]+ deaths [\w\s]+"): lambda country: data.get_country_data(country)['total_deaths']}
+    UPDATE_COMMAND = "update"
+    while True:
+        print("Listening ...")
+        text = get_audio()
+        print(text)
+        result = None
+        for pattern, func in COUNTRY_PATTERNS.items():
+            if pattern.match(text):
+                words = set(text.split(" "))
+                for country in country_list:
+                    if country in words:
+                        result = func(country)
+                        break
+        for pattern, func in TOTAL_PATTERNS.items():
+            if pattern.match(text):
+                result = func()
+                break
 
-	COUNTRY_PATTERNS = {
-					re.compile("[\w\s]+ cases [\w\s]+"): lambda country: data.get_country_data(country)['total_cases'],
-                    re.compile("[\w\s]+ deaths [\w\s]+"): lambda country: data.get_country_data(country)['total_deaths'],
-					}
-
-	UPDATE_COMMAND = "update"
-        while True:
-            print("Listening...")
-            text = get_audio()
-            print(text)
-            result = None
-
-            for pattern, func in COUNTRY_PATTERNS.items():
-                if pattern.match(text):
-                    words = set(text.split(" "))
-                    for country in country_list:
-                        if country in words:
-                            result = func(country)
-                            break
-
+        if text == UPDATE_COMMAND:
+            result = "Data is being updated"
+            data.update_data()
