@@ -7,9 +7,9 @@ import re
 import pyaudio
 import speech_recognition as sr
 
-API_KEY = ""
-PROJECT_TOKEN = ""
-RUN_TOKEN = ""
+API_KEY = "texE21-QTUFP"
+PROJECT_TOKEN = "tigYU5p1stUq"
+RUN_TOKEN = "tEesdam2LkbE"
 
 class Data:
     def __init__(self, api_key, project_token):
@@ -121,3 +121,12 @@ def main():
         if text == UPDATE_COMMAND:
             result = "Data is being updated"
             data.update_data()
+
+        if result:
+            speak(result)
+
+        if text.find(END_PHRASE) != -1:  # stop loop
+            print("Exit")
+            break
+
+main()
